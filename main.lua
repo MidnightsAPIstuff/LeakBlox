@@ -57,7 +57,6 @@ local ScriptList = {
 }
 
 local SearchBox = HubSection:NewTextBox("Search Scripts", "Type to search", function(t) end)
-
 local ScrollFrame = Instance.new("ScrollingFrame")
 ScrollFrame.Size = UDim2.new(1, 0, 0, 400)
 ScrollFrame.Position = UDim2.new(0, 0, 0, 50)
@@ -70,7 +69,6 @@ local function LoadScripts(search)
     for i, v in pairs(ScrollFrame:GetChildren()) do
         if v:IsA("TextButton") then v:Destroy() end
     end
-    
     local yPos = 0
     for _, script in ipairs(ScriptList) do
         if search == "" or script.name:lower():find(search:lower()) then
@@ -82,7 +80,6 @@ local function LoadScripts(search)
             Button.TextColor3 = Color3.new(1, 1, 1)
             Button.BorderSizePixel = 0
             Button.Parent = ScrollFrame
-            
             Button.MouseButton1Click:Connect(function()
                 local success, result = pcall(function()
                     return game:HttpGet(script.url)
@@ -104,14 +101,13 @@ local function LoadScripts(search)
                     })
                 end
             end)
-            
             yPos = yPos + 30
         end
     end
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, yPos)
 end
 
-SearchBox.TextBox.Changed:Connect(function()
+SearchBox.TextBox:GetPropertyChangedSignal("Text"):Connect(function()
     LoadScripts(SearchBox.TextBox.Text)
 end)
 
@@ -127,18 +123,16 @@ RemoteSection:NewButton("Scan Remotes", "Scans for remote events", function()
             table.insert(remotes, v)
         end
     end
-    
     for i, remote in ipairs(remotes) do
         local RemoteButton = RemoteSection:NewButton(remote.Name, "Click to execute", function()
             ScriptBox.TextBox.Text = ScriptBox.TextBox.Text .. "\n\n-- Remote: " .. remote.Parent.Name .. "." .. remote.Name .. "\n" .. remote:GetFullName()
         end)
         if i > 20 then break end
     end
-    
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "LeakBlox";
         Text = "Found " .. #remotes .. " remotes";
-        Icon = "https://qu.ax/rR0bn";
+        Icon = "https://qu.ax/rR0bn"; 
         Duration = 3;
     })
 end)
@@ -147,22 +141,21 @@ local SettingsTab = Window:NewTab("Settings")
 local SettingsSection = SettingsTab:NewSection("Configuration")
 
 SettingsSection:NewButton("Drag GUI", "Enable dragging", function()
-    local gui = script.Parent.Parent
-    gui.Draggable = true
+    local main = Window:GetMain()
+    main.Active = true
+    main.Draggable = true
 end)
 
 SettingsSection:NewButton("Check Detection", "Check if current script is detected", function()
     local scriptText = ScriptBox.TextBox.Text:lower()
     local detected = false
     local keywords = {"spy", "bypass", "kick", "ban", "exploit", "crash", "lag", "freeze", "delete"}
-    
     for _, word in ipairs(keywords) do
         if scriptText:find(word) then
             detected = true
             break
         end
     end
-    
     if detected then
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "LeakBlox";
